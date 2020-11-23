@@ -12,18 +12,23 @@ Microsoft SQL VDI (Virtual Device Interface) that bridges to a .NET stream
 4) Start the backup/restore by calling vdi.RunStream(), which will return a Task.
 
 5) Loop and check for any possible errors, as well as Task.IsComplete or vdi.StreamComplete.
+   
    a) If an error occurs (i.e. pushing to remote system and it runs out of drive space) call vdi.AbortStream() and wait for the Task to complete.
-   b) If running a BACKUP and vdi.StreamComplete is true, verify that the data has completed (i.e. if restoring the backup stream to another server, verify that the remote restore completes) and then call either vdi.ConfirmBackup() or vdi.AbortStream().
+   
+   b) If running a BACKUP, check to see if vdi.StreamComplete becomes true. If so, verify that the data has completed (i.e. if restoring the backup stream to another server, verify that the remote restore completes) and then call either vdi.ConfirmBackup() or vdi.AbortStream().
+   
    c) Once Task.IsComplete is true, you may exit the loop.
 
 # Notes:
-1) The process running the VDI must be on the same server as the SQL server, as VDI uses COM.
+1) The process running the VDI must be on the same server as the SQL server (VDI uses COM).
 
-2) The VDI uses a trusted connection when running the BACKUP/RESTORE commands.
+2) The VDI uses a trusted connection to the SQL instance when executing the BACKUP/RESTORE commands.
 
 3) Network streams cannot be cancelled, so if you need to dispose of a VDI while in the middle of a long network timeout, you can signal the VDI to close your stream for you after the timeout completes.
+   
    Set vdi.DisposeVDIStreamAfterReadWriteTask = true before calling vdi.Dispose().
-   Note: on long timeouts for gigantic databases, this can be an hour or more!
+   
+   Note: on long timeouts for gigantic databases, you may have this set for an hour or more!
 
 4) A RESTORE usually must be run from the master database context to avoid locking issues, so when instantiating the VDIEngine( ), use "master" as the initial database parameter.
 

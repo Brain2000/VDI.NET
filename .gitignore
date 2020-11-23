@@ -1,0 +1,6 @@
+.vs/
+obj/
+bin/
+x64/
+x32/
+*.user
